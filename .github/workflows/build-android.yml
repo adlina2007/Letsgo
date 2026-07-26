@@ -9,9 +9,7 @@ on:
 
 jobs:
   build-android:
-
     name: Build Android APK
-
     runs-on: ubuntu-latest
 
     permissions:
@@ -19,64 +17,64 @@ jobs:
 
     steps:
 
-      # 1. دریافت سورس پروژه
+      # 1. Checkout source code
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # 2. نصب Node.js
+      # 2. Setup Node.js
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
 
-      # 3. نصب Java 17
+      # 3. Setup JDK 17
       - name: Setup JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      # 4. تنظیم Android SDK
+      # 4. Setup Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 5. نصب SDK Platform 36 و Platform Tools
+      # 5. Install Android SDK Platform
       - name: Install Android SDK
         run: |
           sdkmanager "platform-tools"
           sdkmanager "platforms;android-36"
 
-      # 6. پذیرش Licenseهای Android
+      # 6. Accept Android SDK licenses
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true
 
-      # 7. نصب وابستگی‌های Node
+      # 7. Install Node dependencies
       - name: Install npm dependencies
         run: npm ci
 
-      # 8. Build پروژه Vite
+      # 8. Build Vite application
       - name: Build web application
         run: npm run build
 
-      # 9. Sync کردن Capacitor
+      # 9. Sync Capacitor
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 10. تنظیم Gradle
+      # 10. Setup Gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # 11. دادن مجوز اجرای Gradle Wrapper
+      # 11. Make Gradle Wrapper executable
       - name: Make Gradle Wrapper executable
         run: chmod +x android/gradlew
 
-      # 12. ساخت APK Debug
+      # 12. Build Debug APK
       - name: Build Debug APK
         working-directory: android
         run: ./gradlew assembleDebug
 
-      # 13. ذخیره APK به عنوان Artifact
+      # 13. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
