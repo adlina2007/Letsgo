@@ -2,11 +2,11 @@ name: Build Letsgo Android APK
 
 on:
   workflow_dispatch:
-
-  push:
-    branches:
-      - main
-
+push:
+    tags:
+      - 'v*'
+permissions:
+  contents: write
 jobs:
   build-android:
     name: Build Android APK
@@ -101,10 +101,26 @@ jobs:
         working-directory: android
         run: ./gradlew assembleDebug --stacktrace --info
 
-      # 14. Upload APK
-      - name: Upload APK
+      # Rename APK
+      - name: Rename APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Letsgo.apk
+
+      # Upload APK as Artifact
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: letsgo-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: Letsgo
+          path: Letsgo.apk
           if-no-files-found: error
+
+      # Create GitHub Release
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Letsgo.apk
+          generate_release_notes: true
+          name: Letsgo ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
